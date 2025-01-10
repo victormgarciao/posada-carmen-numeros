@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { initialFinancialRecords, FinancialRecordManager } from './data';
 import './styles.css';
 
@@ -71,22 +73,50 @@ function App() {
       </header>
 
       <main>
-        <div className="records-grid">
-          {records.map(record => (
-            <div key={record.id} className="record-card">
-              <p><strong>Día:</strong> {record.dia}</p>
-              <p><strong>Fecha:</strong> {record.fecha}</p>
-              <p><strong>Concepto:</strong> {record.concepto}</p>
-              <p><strong>Cantidad:</strong> €{record.cantidad.toFixed(2)}</p>
-              <p><strong>Método:</strong> {record.metodo}</p>
-              <p><strong>Tipo:</strong> {record.tipo}</p>
-              <p><strong>Periodo:</strong> {record.periodo}</p>
-              <div className="record-actions">
-                <button onClick={() => openEditModal(record)}>Editar</button>
-                <button onClick={() => handleDeleteRecord(record.id)}>Eliminar</button>
-              </div>
-            </div>
-          ))}
+        <div className="financial-table-container">
+          <table className="financial-table">
+            <thead>
+              <tr>
+                <th>Día</th>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Cantidad</th>
+                <th>Método</th>
+                <th>Tipo</th>
+                <th>Periodo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {records.map(record => (
+                <tr key={record.id}>
+                  <td>{record.dia}</td>
+                  <td>{record.fecha}</td>
+                  <td>{record.concepto}</td>
+                  <td>€{record.cantidad.toFixed(2)}</td>
+                  <td>{record.metodo}</td>
+                  <td>{record.tipo}</td>
+                  <td>{record.periodo}</td>
+                  <td className="actions-cell">
+                    <button 
+                      className="icon-button edit-button" 
+                      onClick={() => openEditModal(record)}
+                      title="Editar"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button 
+                      className="icon-button delete-button" 
+                      onClick={() => handleDeleteRecord(record.id)}
+                      title="Eliminar"
+                    >
+                      <DeleteIcon />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
 
