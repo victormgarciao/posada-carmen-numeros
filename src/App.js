@@ -1,30 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialFinancialRecords, FinancialRecordManager } from './data';
 import './styles.css';
 
+// Utility function to get day of the week
+function getDayOfWeek(dateString) {
+  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const date = new Date(dateString);
+  return days[date.getDay()];
+}
+
 function App() {
-  const [records, setRecords] = useState(initialFinancialRecords);
+  // Use a state variable for the record manager to trigger re-renders
+  const [recordManager] = useState(() => {
+    const manager = new FinancialRecordManager();
+    return manager;
+  });
+
+  // State to manage records with sorting
+  const [records, setRecords] = useState(() => 
+    initialFinancialRecords.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+  );
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
 
-  const recordManager = new FinancialRecordManager();
+  const updateRecordsList = () => {
+    // Sort records by date when updating
+    const sortedRecords = recordManager.getAllRecords().sort((a, b) => 
+      new Date(a.fecha) - new Date(b.fecha)
+    );
+    setRecords(sortedRecords);
+  };
 
   const handleAddRecord = (record) => {
-    const newRecord = recordManager.addRecord(record);
-    setRecords([...recordManager.getAllRecords()]);
+    // Add day of week dynamically
+    record.dia = getDayOfWeek(record.fecha);
+    recordManager.addRecord(record);
+    updateRecordsList();
     setIsModalOpen(false);
   };
 
   const handleUpdateRecord = (id, updatedRecord) => {
+    // Update day of week when modifying
+    updatedRecord.dia = getDayOfWeek(updatedRecord.fecha);
     recordManager.updateRecord(id, updatedRecord);
-    setRecords([...recordManager.getAllRecords()]);
+    updateRecordsList();
     setIsModalOpen(false);
   };
 
   const handleDeleteRecord = (id) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este registro?')) {
       recordManager.deleteRecord(id);
-      setRecords([...recordManager.getAllRecords()]);
+      updateRecordsList();
     }
   };
 
@@ -86,7 +113,6 @@ function App() {
 
 function RecordForm({ record, recordManager, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(record || {
-    dia: 'Lunes',
     fecha: new Date().toISOString().split('T')[0],
     concepto: '',
     cantidad: 0,
@@ -134,13 +160,6 @@ function RecordForm({ record, recordManager, onSubmit, onCancel }) {
 
   return (
     <form id="record-form" onSubmit={handleSubmit}>
-      <label htmlFor="dia">Día</label>
-      <select id="dia" value={formData.dia} onChange={handleChange} required>
-        {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(dia => (
-          <option key={dia} value={dia}>{dia}</option>
-        ))}
-      </select>
-
       <label htmlFor="fecha">Fecha</label>
       <input 
         type="date" 
@@ -184,7 +203,6 @@ function RecordForm({ record, recordManager, onSubmit, onCancel }) {
         </div>
       )}
 
-      {/* Rest of the form remains the same */}
       <label htmlFor="cantidad">Cantidad</label>
       <input 
         type="number" 

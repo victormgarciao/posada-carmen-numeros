@@ -22,17 +22,18 @@ export const initialFinancialRecords = [
 ];
 
 export class FinancialRecordManager {
-  constructor() {
-    this.records = [...initialFinancialRecords];
-    this.conceptos = this.extractUniqueConcepts();
-  }
+    constructor() {
+      this.records = [...initialFinancialRecords];
+      this.conceptos = this.extractUniqueConcepts();
+      this.nextId = Math.max(...this.records.map(r => r.id), 0) + 1;
+    }
 
   extractUniqueConcepts() {
     return [...new Set(this.records.map(record => record.concepto))];
   }
 
   addRecord(record) {
-    record.id = this.records.length + 1;
+    record.id = this.nextId++;
     this.records.push(record);
     
     // Update unique concepts if a new one is added
